@@ -18,15 +18,15 @@ jobs:
         id: baseupdatecheck-regular
         uses: lucacome/docker-image-update-checker@v1.1.0
         with:
-          base-image: library/golang:alpine
-          image: caddy:builder
+          base-image: caddy:builder
+          image: technoguyfication/caddy-cloudflare:latest
       
       - name: Check Alpine Image Updates
         id: baseupdatecheck-alpine
         uses: lucacome/docker-image-update-checker@v1.1.0
         with:
-          base-image: library/golang:alpine
-          image: caddy:builder
+          base-image: caddy:builder-alpine
+          image: technoguyfication/caddy-cloudflare:alpine
 
       # only execute subsequent steps if an update is actually NEEDED.
       # unfortunately we need to add an if-condition to all steps now

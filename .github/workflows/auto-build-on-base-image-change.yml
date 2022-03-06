@@ -45,7 +45,7 @@ jobs:
         with:
           context: "${{ github.workspace }}"
           push: true
-          tags: technoguyfication:caddy-cloudflare:latest
+          tags: technoguyfication/caddy-cloudflare:latest
         if: steps.baseupdatecheck-regular.outputs.needs-updating == 'true'
 
       - name: Build and push Alpine Docker Image
@@ -53,6 +53,6 @@ jobs:
         with:
           context: "${{ github.workspace }}"
           push: true
-          tags: technoguyfication:caddy-cloudflare:alpine
+          tags: technoguyfication/caddy-cloudflare:alpine
           file: "{context}/Dockerfile.alpine"
         if: steps.baseupdatecheck-alpine.outputs.needs-updating == 'true'

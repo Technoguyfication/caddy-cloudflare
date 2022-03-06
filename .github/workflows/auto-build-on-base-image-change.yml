@@ -16,16 +16,16 @@ jobs:
 
       - name: Check Regular Image Updates
         id: baseupdatecheck-regular
-        uses: lucacome/docker-image-update-checker@v1
+        uses: lucacome/docker-image-update-checker@v1.1.0
         with:
-          base-image: caddy:builder
+          base-image: library/caddy:builder
           image: technoguyfication/caddy-cloudflare:latest
       
       - name: Check Alpine Image Updates
         id: baseupdatecheck-alpine
-        uses: lucacome/docker-image-update-checker@v1
+        uses: lucacome/docker-image-update-checker@v1.1.0
         with:
-          base-image: caddy:builder-alpine
+          base-image: library/caddy:builder-alpine
           image: technoguyfication/caddy-cloudflare:alpine
 
       # only execute subsequent steps if an update is actually NEEDED.

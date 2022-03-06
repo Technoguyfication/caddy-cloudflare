@@ -1,38 +1,21 @@
-name: Base image update check
+name: Image Update Check
 on:
   schedule:
     - cron: "0 */6 * * *"
   workflow_dispatch:
 
-
 jobs:
-
-  build:
+  build-latest:
     runs-on: ubuntu-latest
     steps:
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Check Regular Image Updates
-        id: baseupdatecheck-regular
+        id: baseupdatecheck
         uses: lucacome/docker-image-update-checker@v1.1.0
         with:
           base-image: library/caddy:builder
           image: technoguyfication/caddy-cloudflare:latest
-      
-      - name: Check Alpine Image Updates
-        id: baseupdatecheck-alpine
-        uses: lucacome/docker-image-update-checker@v1.1.0
-        with:
-          base-image: library/caddy:builder-alpine
-          image: technoguyfication/caddy-cloudflare:alpine
-
-      # only execute subsequent steps if an update is actually NEEDED.
-      # unfortunately we need to add an if-condition to all steps now
-      # because a clean exit can't be triggered within a job it seems
-      # (a cancellation is NOT the same and triggers a failure email)
-      # see also https://github.com/actions/runner/issues/662
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -46,7 +29,25 @@ jobs:
           context: "${{ github.workspace }}"
           push: true
           tags: technoguyfication/caddy-cloudflare:latest
-        if: steps.baseupdatecheck-regular.outputs.needs-updating == 'true'
+        if: steps.baseupdatecheck.outputs.needs-updating == 'true'
+
+  build-alpine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check Alpine Image Updates
+        id: baseupdatecheck
+        uses: lucacome/docker-image-update-checker@v1.1.0
+        with:
+          base-image: library/caddy:builder-alpine
+          image: technoguyfication/caddy-cloudflare:alpine
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Alpine Docker Image
         uses: docker/build-push-action@v2.6.1
@@ -55,4 +56,4 @@ jobs:
           push: true
           tags: technoguyfication/caddy-cloudflare:alpine
           file: "{context}/Dockerfile.alpine"
-        if: steps.baseupdatecheck-alpine.outputs.needs-updating == 'true'
+        if: steps.baseupdatecheck.outputs.needs-updating == 'true'

@@ -1,7 +1,7 @@
-name: Image Update Check
+name: Auto Image Rebuild
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 3 * * 1"
   workflow_dispatch:
 
 jobs:
@@ -9,13 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: Check Regular Image Updates
-        id: baseupdatecheck
-        uses: lucacome/docker-image-update-checker@v1.1.0
-        with:
-          base-image: library/caddy:builder
-          image: technoguyfication/caddy-cloudflare:latest
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -29,19 +22,11 @@ jobs:
           context: "${{ github.workspace }}"
           push: true
           tags: technoguyfication/caddy-cloudflare:latest
-        if: steps.baseupdatecheck.outputs.needs-updating == 'true'
 
   build-alpine:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: Check Alpine Image Updates
-        id: baseupdatecheck
-        uses: lucacome/docker-image-update-checker@v1.1.0
-        with:
-          base-image: library/caddy:builder-alpine
-          image: technoguyfication/caddy-cloudflare:alpine
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -55,5 +40,4 @@ jobs:
           context: "${{ github.workspace }}"
           push: true
           tags: technoguyfication/caddy-cloudflare:alpine
-          file: "${context}/Dockerfile.alpine"
-        if: steps.baseupdatecheck.outputs.needs-updating == 'true'
+          file: "Dockerfile.alpine"

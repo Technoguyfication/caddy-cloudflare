@@ -14,12 +14,19 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Docker Image Update Checker
-        id: baseupdatecheck
+      - name: Check Regular Image Updates
+        id: baseupdatecheck-regular
         uses: lucacome/docker-image-update-checker@v1.1.0
         with:
           base-image: library/golang:alpine
-          image: caddy-builder:latest
+          image: caddy:builder
+      
+      - name: Check Alpine Image Updates
+        id: baseupdatecheck-alpine
+        uses: lucacome/docker-image-update-checker@v1.1.0
+        with:
+          base-image: library/golang:alpine
+          image: caddy:builder
 
       # only execute subsequent steps if an update is actually NEEDED.
       # unfortunately we need to add an if-condition to all steps now
@@ -32,7 +39,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-        if: steps.baseupdatecheck.outputs.needs-updating == 'true'
 
       - name: Build and push Regular Docker Image
         uses: docker/build-push-action@v2.6.1
@@ -40,7 +46,7 @@ jobs:
           context: "${{ github.workspace }}"
           push: true
           tags: technoguyfication:caddy-cloudflare:latest
-        if: steps.baseupdatecheck.outputs.needs-updating == 'true'
+        if: steps.baseupdatecheck-regular.outputs.needs-updating == 'true'
 
       - name: Build and push Alpine Docker Image
         uses: docker/build-push-action@v2.6.1
@@ -49,4 +55,4 @@ jobs:
           push: true
           tags: technoguyfication:caddy-cloudflare:alpine
           file: "{context}/Dockerfile.alpine"
-        if: steps.baseupdatecheck.outputs.needs-updating == 'true'
+        if: steps.baseupdatecheck-alpine.outputs.needs-updating == 'true'

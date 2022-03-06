@@ -55,5 +55,5 @@ jobs:
           context: "${{ github.workspace }}"
           push: true
           tags: technoguyfication/caddy-cloudflare:alpine
-          file: "{context}/Dockerfile.alpine"
+          file: "${context}/Dockerfile.alpine"
         if: steps.baseupdatecheck.outputs.needs-updating == 'true'

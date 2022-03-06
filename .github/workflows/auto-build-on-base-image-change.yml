@@ -1,0 +1,52 @@
+name: Base image update check
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Docker Image Update Checker
+        id: baseupdatecheck
+        uses: lucacome/docker-image-update-checker@v1.1.0
+        with:
+          base-image: library/golang:alpine
+          image: caddy-builder:latest
+
+      # only execute subsequent steps if an update is actually NEEDED.
+      # unfortunately we need to add an if-condition to all steps now
+      # because a clean exit can't be triggered within a job it seems
+      # (a cancellation is NOT the same and triggers a failure email)
+      # see also https://github.com/actions/runner/issues/662
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        if: steps.baseupdatecheck.outputs.needs-updating == 'true'
+
+      - name: Build and push Regular Docker Image
+        uses: docker/build-push-action@v2.6.1
+        with:
+          context: "${{ github.workspace }}"
+          push: true
+          tags: technoguyfication:caddy-cloudflare:latest
+        if: steps.baseupdatecheck.outputs.needs-updating == 'true'
+
+      - name: Build and push Alpine Docker Image
+        uses: docker/build-push-action@v2.6.1
+        with:
+          context: "${{ github.workspace }}"
+          push: true
+          tags: technoguyfication:caddy-cloudflare:alpine
+          file: "{context}/Dockerfile.alpine"
+        if: steps.baseupdatecheck.outputs.needs-updating == 'true'

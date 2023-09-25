@@ -1,6 +1,5 @@
 # caddy-cloudflare
 
-![](https://img.shields.io/github/workflow/status/technoguyfication/caddy-cloudflare/Auto%20Image%20Rebuild)
 ![](https://img.shields.io/docker/cloud/build/technoguyfication/caddy-cloudflare)
 ![](https://img.shields.io/docker/pulls/technoguyfication/caddy-cloudflare)
 
